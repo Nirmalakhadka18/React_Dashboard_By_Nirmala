@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import LoginForm from "@/components/LoginForm";
 import SignUpForm from "@/components/SignUpForm";
 
@@ -20,7 +20,9 @@ export default function Home() {
         </div>
 
         {isLogin ? (
-          <LoginForm onToggle={toggleAuthMode} />
+          <Suspense fallback={<div>Loading...</div>}>
+            <LoginForm onToggle={toggleAuthMode} />
+          </Suspense>
         ) : (
           <SignUpForm onToggle={toggleAuthMode} />
         )}

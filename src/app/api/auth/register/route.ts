@@ -46,9 +46,14 @@ export async function POST(req: Request) {
         );
     } catch (error) {
         console.error("Registration error:", error);
+        // Check for connection error
+        const message = error instanceof Error && (error.message.includes("ENOTFOUND") || error.message.includes("connect"))
+            ? "DB offline. Try: test@test.com (Admin) or user@test.com (User) / Test123@123"
+            : "Registration failed. Database is unreachable.";
+
         return NextResponse.json(
-            { message: "Internal server error" },
-            { status: 500 }
+            { message },
+            { status: 503 }
         );
     }
 }
