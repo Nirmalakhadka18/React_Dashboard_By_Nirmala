@@ -24,14 +24,35 @@ try {
         const sql = neon(process.env.DATABASE_URL);
         dbInstance = drizzle(sql);
     } else {
+        // Build-time check
         if (process.env.NODE_ENV === "production" && process.argv.includes("build")) {
-            console.warn("⚠️  DATABASE_URL is missing. Skipping DB connection for build.");
+            console.warn("⚠️  DATABASE_URL is missing. Using mock DB for build.");
+            dbInstance = mockDb;
         } else {
-            console.warn("⚠️  DATABASE_URL is missing in .env");
+            // Runtime missing var behavior
+            console.error("❌ DATABASE_URL is missing in .env");
+            throw new Error("DATABASE_URL is missing");
         }
     }
 } catch (error) {
-    console.warn("⚠️  Failed to initialize database connection, using mock:", error);
+    // Catch initialization errors (e.g. invalid URL)
+    console.error("❌ Failed to initialize database connection:", error);
+
+    // Only verify build context again to be safe
+    const isBuild = process.env.NODE_ENV === "production" && process.argv.includes("build");
+
+    if (isBuild) {
+        console.warn("⚠️  Build mode detected. Using mock DB to allow build to finish.");
+        dbInstance = mockDb;
+    } else {
+        // CRITICAL: In runtime, we must NOT use mockDb silently.
+        // We throw or use a proxy that throws on access.
+        dbInstance = new Proxy({}, {
+            get: () => {
+                throw new Error("Database initialization failed. Check server logs for details.");
+            }
+        }) as any;
+    }
 }
 
 export const db = dbInstance;

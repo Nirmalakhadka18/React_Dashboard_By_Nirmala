@@ -46,13 +46,20 @@ export async function POST(req: Request) {
         );
     } catch (error) {
         console.error("Registration error:", error);
+
+        // Log environment status for debugging (without exposing secrets)
+        console.error("DB Config Status:", {
+            hasUrl: !!process.env.DATABASE_URL,
+            nodeEnv: process.env.NODE_ENV,
+        });
+
         // Check for connection error
-        const message = error instanceof Error && (error.message.includes("ENOTFOUND") || error.message.includes("connect"))
-            ? "DB offline. Try: test@test.com (Admin) or user@test.com (User) / Test123@123"
+        const message = error instanceof Error && (error.message.includes("ENOTFOUND") || error.message.includes("connect") || error.message.includes("database"))
+            ? "DB offline or unreachable. Check server logs."
             : "Registration failed. Database is unreachable.";
 
         return NextResponse.json(
-            { message },
+            { message, details: error instanceof Error ? error.message : String(error) },
             { status: 503 }
         );
     }
