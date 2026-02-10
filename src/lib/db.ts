@@ -21,7 +21,9 @@ let dbInstance = mockDb;
 
 try {
     if (process.env.DATABASE_URL) {
-        const sql = neon(process.env.DATABASE_URL);
+        // Sanitize the connection string to remove surrounding quotes if present (common Vercel config issue)
+        const connectionString = process.env.DATABASE_URL.trim().replace(/^["']|["']$/g, "");
+        const sql = neon(connectionString);
         dbInstance = drizzle(sql);
     } else {
         // Build-time check
