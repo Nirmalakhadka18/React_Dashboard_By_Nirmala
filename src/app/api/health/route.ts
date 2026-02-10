@@ -71,22 +71,30 @@ export async function GET() {
         }
 
         const healthData = {
-            status: dbStatus === "connected" && tableCheck === "users_table_exists" ? "ok" : "issues_detected",
+            version: "1.0.1-diagnostic", // BUMP THIS TO CONFIRM DEPLOYMENT
             timestamp: new Date().toISOString(),
+            status: dbStatus === "connected" && tableCheck === "users_table_exists" ? "ok" : "issues_detected",
             env: {
                 DATABASE_URL_SET: hasDbUrl,
-                URL_PREVIEW: urlPreview, // Check if it starts with "postgres...
+                URL_PREVIEW: urlPreview,
                 NODE_ENV: process.env.NODE_ENV,
+                VERCEL_REGION: process.env.VERCEL_REGION || "unknown",
             },
             database: {
                 status: dbStatus,
                 table_check: tableCheck,
                 error: dbError,
             },
+            direct_connection: directConnectionResult
         };
 
         return NextResponse.json(healthData, {
-            status: healthData.status === "ok" ? 200 : 503
+            status: healthData.status === "ok" ? 200 : 503,
+            headers: {
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            }
         });
 
     } catch (error) {
