@@ -49,8 +49,8 @@ export async function GET() {
             // directConnectionResult is already defined in outer scope, do not redeclare
             directConnectionResult = { status: "pending" };
             try {
-                // Import neon dynamically
-                const { neon } = require("@neondatabase/serverless");
+                // Import neon dynamically (ESM compatible)
+                const { neon } = await import("@neondatabase/serverless");
 
                 // Use the same sanitization/connection logic as db.ts (simulated)
                 const sqlDirect = neon(cleanUrl);
@@ -73,7 +73,7 @@ export async function GET() {
         }
 
         const healthData = {
-            version: "1.0.1-diagnostic", // BUMP THIS TO CONFIRM DEPLOYMENT
+            version: "1.0.2-fix-shadowing", // BUMPED
             timestamp: new Date().toISOString(),
             status: dbStatus === "connected" && tableCheck === "users_table_exists" ? "ok" : "issues_detected",
             env: {
