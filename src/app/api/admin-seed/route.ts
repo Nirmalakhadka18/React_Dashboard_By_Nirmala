@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
     try {

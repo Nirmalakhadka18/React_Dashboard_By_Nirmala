@@ -2,16 +2,6 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 
 
-if (!process.env.DATABASE_URL) {
-    if (process.env.NODE_ENV === "production" && process.argv.includes("build")) {
-        // Skip DB connection during build if env var is missing
-        console.warn("⚠️  DATABASE_URL is missing. Skipping DB connection for build.");
-    } else {
-        // In dev or runtime, we want to know if it's missing
-        console.warn("⚠️  DATABASE_URL is missing in .env");
-    }
-}
-
 const mockDb = {
     select: () => mockDb,
     from: () => mockDb,
@@ -27,5 +17,21 @@ const mockDb = {
     transaction: (fn: any) => fn(mockDb),
 } as any;
 
-const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : ({} as any);
-export const db = process.env.DATABASE_URL ? drizzle(sql) : mockDb;
+let dbInstance = mockDb;
+
+try {
+    if (process.env.DATABASE_URL) {
+        const sql = neon(process.env.DATABASE_URL);
+        dbInstance = drizzle(sql);
+    } else {
+        if (process.env.NODE_ENV === "production" && process.argv.includes("build")) {
+            console.warn("⚠️  DATABASE_URL is missing. Skipping DB connection for build.");
+        } else {
+            console.warn("⚠️  DATABASE_URL is missing in .env");
+        }
+    }
+} catch (error) {
+    console.warn("⚠️  Failed to initialize database connection, using mock:", error);
+}
+
+export const db = dbInstance;
