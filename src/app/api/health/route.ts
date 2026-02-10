@@ -54,7 +54,8 @@ export async function GET() {
 
                 // Use the same sanitization/connection logic as db.ts (simulated)
                 const sqlDirect = neon(cleanUrl);
-                const result = await sqlDirect`SELECT 1 as val`; // FIXED: Tagged template
+                // Attempt to query the users table directly to rule out Drizzle issues
+                const result = await sqlDirect`SELECT count(*) as count FROM users`;
                 directConnectionResult = {
                     sanitized_url_preview: urlPreview,
                     status: "success",
@@ -73,7 +74,7 @@ export async function GET() {
         }
 
         const healthData = {
-            version: "1.0.2-fix-shadowing", // BUMPED
+            version: "1.0.3-debug-users", // PROBING USERS TABLE
             timestamp: new Date().toISOString(),
             status: dbStatus === "connected" && tableCheck === "users_table_exists" ? "ok" : "issues_detected",
             env: {
