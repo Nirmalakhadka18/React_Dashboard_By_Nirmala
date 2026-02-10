@@ -65,6 +65,23 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
+            {/* Tools Section */}
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Tools</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <a href="/dashboard/ai-tools" className="block group">
+                    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 group-hover:shadow-lg transition-all transform group-hover:-translate-y-1">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-gray-500 text-sm font-medium uppercase tracking-wider">AI Tool</h3>
+                            <span className="p-2 bg-indigo-100 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">Video Summarizer</p>
+                        <p className="text-sm text-gray-400 mt-1">Summarize YouTube videos & get notes</p>
+                    </div>
+                </a>
+            </div>
+
             {session.user.role === "admin" && (
                 <div className="mt-8">
                     <a href="/admin" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-lg">
