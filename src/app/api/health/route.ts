@@ -21,6 +21,9 @@ export async function GET() {
         let dbError = null;
         let tableCheck = "skipped";
 
+        // 3. Direct Neon Driver Check (Diagnostic) - Initialize outside if block
+        let directConnectionResult = null;
+
         if (hasDbUrl) {
             try {
                 // Attempt a simple query
@@ -39,6 +42,30 @@ export async function GET() {
                 dbStatus = "disconnected";
                 dbError = e instanceof Error ? e.message : String(e);
             }
+
+            // 3. Direct Neon Driver Check (Diagnostic)
+            // Isolate Drizzle from the equation to verify raw connectivity
+            const cleanUrl = dbUrl.trim().replace(/^["']|["']$/g, "");
+            let directStatus = "unknown";
+            let directError = null;
+
+            try {
+                // Import neon dynamically or assume it's available via closure if imported
+                const { neon } = require("@neondatabase/serverless");
+                const sqlDirect = neon(cleanUrl);
+                await sqlDirect("SELECT 1");
+                directStatus = "connected";
+            } catch (dErr) {
+                directStatus = "failed";
+                directError = dErr instanceof Error ? dErr.message : String(dErr);
+            }
+
+            directConnectionResult = {
+                sanitized_url_preview: `${cleanUrl.substring(0, 15)}...`,
+                status: directStatus,
+                error: directError
+            };
+
         } else {
             dbStatus = "missing_env";
         }
