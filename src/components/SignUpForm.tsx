@@ -36,7 +36,11 @@ export default function SignUpForm({ onToggle, onSuccess }: SignUpFormProps) {
                 }
             } else {
                 const data = await res.json();
-                setError(data.message || "Registration failed");
+                // Show detailed error if available, otherwise fallback to message or default
+                const errorMessage = data.details
+                    ? `${data.message} (${data.details})`
+                    : (data.message || "Registration failed");
+                setError(errorMessage);
             }
         } catch (err) {
             setError("An error occurred");
