@@ -44,27 +44,28 @@ export async function GET() {
             }
 
             // 3. Direct Neon Driver Check (Diagnostic)
-            // Isolate Drizzle from the equation to verify raw connectivity
+            // 4. Test Direct Driver Connection (Raw) to isolate Drizzle
             const cleanUrl = dbUrl.trim().replace(/^["']|["']$/g, "");
-            let directStatus = "unknown";
-            let directError = null;
-
+            let directConnectionResult: any = { status: "pending" };
             try {
-                // Import neon dynamically or assume it's available via closure if imported
+                // Import neon dynamically
                 const { neon } = require("@neondatabase/serverless");
-                const sqlDirect = neon(cleanUrl);
-                await sqlDirect("SELECT 1");
-                directStatus = "connected";
-            } catch (dErr) {
-                directStatus = "failed";
-                directError = dErr instanceof Error ? dErr.message : String(dErr);
-            }
 
-            directConnectionResult = {
-                sanitized_url_preview: `${cleanUrl.substring(0, 15)}...`,
-                status: directStatus,
-                error: directError
-            };
+                // Use the same sanitization/connection logic as db.ts (simulated)
+                const sqlDirect = neon(cleanUrl);
+                const result = await sqlDirect`SELECT 1 as val`; // FIXED: Tagged template
+                directConnectionResult = {
+                    sanitized_url_preview: urlPreview,
+                    status: "success",
+                    result
+                };
+            } catch (err) {
+                directConnectionResult = {
+                    sanitized_url_preview: urlPreview,
+                    status: "failed",
+                    error: err instanceof Error ? err.message : String(err)
+                };
+            }
 
         } else {
             dbStatus = "missing_env";
