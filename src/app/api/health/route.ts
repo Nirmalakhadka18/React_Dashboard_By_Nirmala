@@ -46,7 +46,8 @@ export async function GET() {
             // 3. Direct Neon Driver Check (Diagnostic)
             // 4. Test Direct Driver Connection (Raw) to isolate Drizzle
             const cleanUrl = dbUrl.trim().replace(/^["']|["']$/g, "");
-            let directConnectionResult: any = { status: "pending" };
+            // directConnectionResult is already defined in outer scope, do not redeclare
+            directConnectionResult = { status: "pending" };
             try {
                 // Import neon dynamically
                 const { neon } = require("@neondatabase/serverless");
